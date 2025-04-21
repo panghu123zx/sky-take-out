@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.DishMapper">
+<!--获得生成的主键值 和告诉 我们返回的值是id-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into dish (name,category_id,price,image,description,status,create_time,update_time,create_user,update_user) values
+        (#{name},#{categoryId},#{price},#{image},#{description},#{status},#{createTime},#{updateTime},#{createUser},#{updateUser})
+    </insert>
+    <update id="updateDish" parameterType="com.sky.entity.Dish">
+        update dish
+        <set>
+            <if test="name!=null and name!=''">name=#{name},</if>
+            <if test="categoryId!=null">category_id=#{categoryId},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="image!=null and image!=''">image=#{image},</if>
+            <if test="description!=null and description!=''">description=#{description},</if>
+            <if test="status!=null">status=#{status},</if>
+            <if test="updateUser!=null">update_user=#{updateUser},</if>
+            <if test="updateTime!=null">update_time=#{updateTime},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="selectPage" resultType="com.sky.vo.DishVO">
+        select d.*,c.name as categoryName from dish d left outer join category c on d.category_id=c.id
+        <where>
+            <if test="name!=null and name!=''"> d.name like concat('%',#{name},'%')</if>
+            <if test="categoryId!=null">d.category_id=#{categoryId}</if>
+            <if test="status!=null">d.status=#{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+    <select id="queryStatus" resultType="java.lang.Long">
+        select count(*) from dish where status=1 and id in
+        <foreach collection="ids" item="id"  separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+    <select id="selectDish" resultType="com.sky.vo.DishVO" parameterType="java.lang.Long">
+        select d.*,c.name as categoryName from dish d left outer join category c on d.category_id=c.id
+        where d.id=#{id}
+    </select>
+    <select id="list" resultType="com.sky.entity.Dish">
+        select * from dish
+        <where>
+            <if test="name != null">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from dish
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+        </where>
+    </select>
+</mapper>
+
